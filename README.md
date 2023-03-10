@@ -10,6 +10,11 @@ I got tired of having to hunt down every material one-by-one when changing min/m
 - [Poiyomi Toon 8.1](https://github.com/poiyomi/PoiyomiToonShader)
 - [lilToon](https://github.com/lilxyzw/lilToon)
 
+## How to use
+- After importing the unity package, go to *dylTools* on the menu bar and select *Shader Brightness Manager*.
+- Then, drag or select an avatar on the selector. The tool will display all the brightness values for the supported materials, and any materials it can't use.
+- For shaders that support locking, do note **materials have to be unlocked** in order for the tool to recognize it.
+
 ## Download
 The latest release is available [here](https://github.com/medylme/ShaderBrightnessManager/releases/latest).
 
