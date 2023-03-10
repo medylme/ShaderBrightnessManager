@@ -10,7 +10,7 @@ using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
 using static VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters;
 
-namespace dylTools.ShaderBrightnessManager
+namespace medyl.ShaderBrightnessManager
 {
     public class ShaderBrightnessManager : EditorWindow
     {
@@ -18,7 +18,7 @@ namespace dylTools.ShaderBrightnessManager
         private VisualElement _topArea;
         private ScrollView _mainContainer;
 
-        [MenuItem("dylTools/Shader Brightness Manager")]
+        [MenuItem("medyl/Shader Brightness Manager")]
         public static void ShowWindow()
         {
             GetWindow<ShaderBrightnessManager>("Shader Brightness Manager");

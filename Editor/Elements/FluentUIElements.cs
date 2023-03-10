@@ -3,7 +3,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace dylTools.ShaderBrightnessManager
+namespace medyl.ShaderBrightnessManager
 {
     public static class FluentUIElements
     {
