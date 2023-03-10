@@ -14,8 +14,6 @@ namespace dylTools.ShaderBrightnessManager
 {
     public class ShaderBrightnessManager : EditorWindow
     {
-        private string CURRENT_VERSION = "Dev";
-
         private VRCAvatarDescriptor _avatar;
         private VisualElement _topArea;
         private ScrollView _mainContainer;
@@ -224,7 +222,7 @@ namespace dylTools.ShaderBrightnessManager
                     .WithClass("shader-element")
                     .ChildOf(shaderList);
 
-                Label materialName = new Label($"- {material.name}")
+                Label materialName = new Label($"- {material.name} ({shaderName})")
                     .WithClass("shader-name")
                     .ChildOf(shaderElement);
                 materialName.style.fontSize = 13;
@@ -305,7 +303,7 @@ namespace dylTools.ShaderBrightnessManager
             );
             parentElement.Add(supportedShadersLabel);
 
-            Label versionLabel = new Label($"version Dev").WithClass("header");
+            Label versionLabel = new Label("version 0.1.0").WithClass("header");
             versionLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             versionLabel.style.marginTop = 12;
             versionLabel.style.marginBottom = 8;
