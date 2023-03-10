@@ -303,7 +303,7 @@ namespace dylTools.ShaderBrightnessManager
             );
             parentElement.Add(supportedShadersLabel);
 
-            Label versionLabel = new Label("version 0.1.0").WithClass("header");
+            Label versionLabel = new Label("version Dev").WithClass("header");
             versionLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             versionLabel.style.marginTop = 12;
             versionLabel.style.marginBottom = 8;
