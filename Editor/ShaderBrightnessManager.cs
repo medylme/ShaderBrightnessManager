@@ -14,11 +14,11 @@ namespace dylTools.ShaderBrightnessManager
 {
     public class ShaderBrightnessManager : EditorWindow
     {
-        private string CURRENT_VERSION = "0.1.1";
+        private string CURRENT_VERSION = "Dev";
 
         private VRCAvatarDescriptor _avatar;
         private VisualElement _topArea;
-        private ScrollView _selectedTabArea;
+        private ScrollView _mainContainer;
 
         [MenuItem("dylTools/Shader Brightness Manager")]
         public static void ShowWindow()
@@ -29,7 +29,8 @@ namespace dylTools.ShaderBrightnessManager
         private void OnEnable()
         {
             VisualElement root = rootVisualElement;
-            root.style.minWidth = 320;
+
+            // Load stylesheet
             var styleSheet = Resources.Load<StyleSheet>("ShaderBrightnessManagerStyle");
             if (styleSheet != null)
             {
@@ -40,28 +41,31 @@ namespace dylTools.ShaderBrightnessManager
                 Debug.LogError("Failed to load style sheet: ShaderBrightnessManagerStyle");
             }
 
+            // Top Area
             VisualElement topArea = new VisualElement().WithClass("top-area").ChildOf(root);
-            VisualElement mainBody = new VisualElement()
-                .WithFlexDirection(FlexDirection.RowReverse)
-                .WithFlexGrow(1)
-                .ChildOf(root);
-            VisualElement tabsArea = new VisualElement().WithClass("tabs-area").ChildOf(mainBody);
-            _selectedTabArea = new ScrollView().WithClass("selected-tab").ChildOf(mainBody);
-
             LoadTopArea(topArea);
 
-            UpdateTabs();
+            // Main Area
+            VisualElement mainBody = new VisualElement()
+                .WithClass("main-body")
+                .WithFlexGrow(1)
+                .ChildOf(root);
+
+            _mainContainer = new ScrollView().WithClass("main-container").ChildOf(mainBody);
+            UpdateMainArea();
         }
 
         private void LoadTopArea(VisualElement topArea)
         {
+            // Avatar Field
             ObjectField avatar = FluentUIElements
                 .NewObjectField("Avatar", typeof(VRCAvatarDescriptor), _avatar)
                 .WithClass("avatar-field")
                 .WithFlexGrow(1)
                 .ChildOf(topArea);
 
-            Button refreshButton = new Button(UpdateTabs)
+            // Refresh Button
+            Button refreshButton = new Button(UpdateMainArea)
                 .WithClass("refresh-button")
                 .ChildOf(topArea);
             refreshButton.text = "Refresh";
@@ -70,54 +74,59 @@ namespace dylTools.ShaderBrightnessManager
             {
                 _avatar = (VRCAvatarDescriptor)e.newValue;
 
-                UpdateTabs();
+                UpdateMainArea();
             });
         }
 
-        private void UpdateTabs()
+        private void UpdateMainArea()
         {
-            _selectedTabArea.Clear();
+            _mainContainer.Clear();
 
-            VisualElement materialsList = new VisualElement()
-                .WithClass("materials-list")
-                .ChildOf(_selectedTabArea);
+            VisualElement sectionList = new VisualElement().ChildOf(_mainContainer);
 
-            Foldout aboutHeader = new Foldout().WithClass("about-header").ChildOf(materialsList);
-            aboutHeader.value = false;
-            aboutHeader.text = "About";
-            aboutHeader.style.fontSize = 13;
-            aboutHeader.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.33f);
-            aboutHeader.style.paddingTop = 4;
-            aboutHeader.style.paddingBottom = 4;
-            aboutHeader.style.marginLeft = 10;
-            aboutHeader.style.marginRight = 10;
-            aboutHeader.style.marginBottom = 4;
-            aboutHeader.style.marginTop = 4;
-            aboutHeader.style.borderTopLeftRadius = 10;
-            aboutHeader.style.borderTopRightRadius = 10;
-            aboutHeader.style.borderBottomRightRadius = 10;
-            aboutHeader.style.borderBottomLeftRadius = 10;
-
-            renderAboutSection(aboutHeader);
+            // - About Section -
+            Foldout aboutSection = new Foldout().WithClass("section").ChildOf(sectionList);
+            aboutSection.value = true;
+            aboutSection.text = "About";
+            renderAboutSection(aboutSection);
 
             if (_avatar == null)
             {
-                AddSelectAvatarLabel();
+                Label selectAvatarLabel = new Label("Select an avatar to begin.").WithClass(
+                    "notice-label"
+                );
+                selectAvatarLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+                _mainContainer.Add(selectAvatarLabel);
                 return;
             }
 
+            // - Material Section -
             SkinnedMeshRenderer[] skinnedMeshRenderers =
                 _avatar.GetComponentsInChildren<SkinnedMeshRenderer>();
+
             if (skinnedMeshRenderers.Length == 0)
             {
-                AddNoMaterialsLabel(materialsList);
+                Label noMaterialsLabel = new Label("No materials found").WithClass("notice-label");
+                noMaterialsLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+                sectionList.Add(noMaterialsLabel);
                 return;
             }
 
+            Foldout materialSection = new Foldout().WithClass("section").ChildOf(sectionList);
+            materialSection.value = true;
+            materialSection.text = "Materials";
+            renderMaterialSection(skinnedMeshRenderers, materialSection);
+        }
+
+        private void renderMaterialSection(
+            SkinnedMeshRenderer[] skinnedMeshRenderers,
+            VisualElement parentElement
+        )
+        {
+            // Get all materials on the avatar and sort them into lists
             List<Material> poiyomi81Shaders = new List<Material>();
             List<Material> lilToonShaders = new List<Material>();
             List<Material> unsupportedShaders = new List<Material>();
-
             foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
             {
                 Material[] materials = skinnedMeshRenderer.sharedMaterials;
@@ -145,101 +154,61 @@ namespace dylTools.ShaderBrightnessManager
                 }
             }
 
-            if (unsupportedShaders.Count > 0)
-            {
-                Foldout unsupportedShadersHeader = new Foldout()
-                    .WithClass("unsupported-shaders-header")
-                    .ChildOf(materialsList);
-                unsupportedShadersHeader.value = false;
-                unsupportedShadersHeader.text = "Unsupported/Locked Materials";
-                unsupportedShadersHeader.style.unityFontStyleAndWeight = FontStyle.Bold;
-                unsupportedShadersHeader.style.fontSize = 13;
-                unsupportedShadersHeader.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.33f);
-                unsupportedShadersHeader.style.paddingTop = 4;
-                unsupportedShadersHeader.style.paddingBottom = 4;
-                unsupportedShadersHeader.style.marginLeft = 10;
-                unsupportedShadersHeader.style.marginRight = 10;
-                unsupportedShadersHeader.style.marginBottom = 4;
-                unsupportedShadersHeader.style.marginTop = 4;
-                unsupportedShadersHeader.style.borderTopLeftRadius = 10;
-                unsupportedShadersHeader.style.borderTopRightRadius = 10;
-                unsupportedShadersHeader.style.borderBottomRightRadius = 10;
-                unsupportedShadersHeader.style.borderBottomLeftRadius = 10;
-
-                unsupportedShaders = unsupportedShaders.Distinct().ToList();
-                AddShadersToUI(
-                    unsupportedShadersHeader,
-                    unsupportedShaders,
-                    "Unsupported/Locked Shaders",
-                    "",
-                    ""
-                );
-            }
-
-            Foldout shaderListHeader = new Foldout()
-                .WithClass("shader-list-header")
-                .ChildOf(materialsList);
-            shaderListHeader.value = true;
-            shaderListHeader.text = "Controls";
-            shaderListHeader.style.fontSize = 13;
-            shaderListHeader.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.33f);
-            shaderListHeader.style.paddingTop = 4;
-            shaderListHeader.style.paddingBottom = 4;
-            shaderListHeader.style.marginLeft = 10;
-            shaderListHeader.style.marginRight = 10;
-            shaderListHeader.style.marginBottom = 4;
-            shaderListHeader.style.marginTop = 4;
-            shaderListHeader.style.borderTopLeftRadius = 10;
-            shaderListHeader.style.borderTopRightRadius = 10;
-            shaderListHeader.style.borderBottomRightRadius = 10;
-            shaderListHeader.style.borderBottomLeftRadius = 10;
-
+            // Poiyomi 8.1 Toon
             if (poiyomi81Shaders.Count > 0)
             {
                 poiyomi81Shaders = poiyomi81Shaders.Distinct().ToList();
-                AddShadersToUI(
-                    shaderListHeader,
-                    poiyomi81Shaders,
+                AddShaderToUI(
                     "Poiyomi 8.1 Toon",
+                    parentElement,
+                    poiyomi81Shaders,
                     "_LightingMinLightBrightness",
                     "_LightingCap"
                 );
             }
 
+            // lilToon
             if (lilToonShaders.Count > 0)
             {
                 lilToonShaders = lilToonShaders.Distinct().ToList();
-                AddShadersToUI(
-                    shaderListHeader,
-                    lilToonShaders,
+                AddShaderToUI(
                     "lilToon",
+                    parentElement,
+                    lilToonShaders,
                     "_LightMinLimit",
                     "_LightMaxLimit"
                 );
             }
+
+            // Unsupported Section
+            if (unsupportedShaders.Count > 0)
+            {
+                Foldout unsupportedShadersSection = new Foldout()
+                    .WithClass("subsection")
+                    .ChildOf(parentElement);
+                unsupportedShadersSection.value = false;
+                unsupportedShadersSection.text = "Unsupported/Locked Materials";
+
+                // Remove duplicates
+                unsupportedShaders = unsupportedShaders.Distinct().ToList();
+
+                foreach (Material material in unsupportedShaders)
+                {
+                    Shader shader = material.shader;
+                    string shaderName = shader ? shader.name : "None";
+
+                    Label unsupportedMaterialLabel = new Label(
+                        $"- {material.name}\n({shaderName})"
+                    ).WithClass("unsupported-material-label");
+                    unsupportedShadersSection.Add(unsupportedMaterialLabel);
+                }
+            }
         }
 
-        private void AddSelectAvatarLabel()
-        {
-            Label selectAvatarLabel = new Label("Select an avatar to begin.").WithClass(
-                "select-avatar-label"
-            );
-            selectAvatarLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _selectedTabArea.Add(selectAvatarLabel);
-        }
-
-        private void AddNoMaterialsLabel(VisualElement parentElement)
-        {
-            Label noMaterialsLabel = new Label("No materials found").WithClass(
-                "no-materials-label"
-            );
-            parentElement.Add(noMaterialsLabel);
-        }
-
-        private void AddShadersToUI(
+        private void AddShaderToUI(
+            string shaderName,
             VisualElement parentElement,
             List<Material> materials,
-            string headerText,
             string minBrightnessPropertyName,
             string maxBrightnessPropertyName
         )
@@ -248,17 +217,6 @@ namespace dylTools.ShaderBrightnessManager
                 .WithClass("shader-list")
                 .ChildOf(parentElement);
             shaderList.style.marginBottom = 16;
-
-            if (headerText != "Unsupported/Locked Shaders")
-            {
-                Label shaderListHeader = new Label(headerText)
-                    .WithClass("shader-list-header")
-                    .ChildOf(shaderList);
-                shaderListHeader.style.unityFontStyleAndWeight = FontStyle.Bold;
-                shaderListHeader.style.unityTextAlign = TextAnchor.MiddleCenter;
-                shaderListHeader.style.fontSize = 14;
-                shaderListHeader.style.marginTop = 4;
-            }
 
             foreach (Material material in materials)
             {
@@ -273,110 +231,82 @@ namespace dylTools.ShaderBrightnessManager
                 materialName.style.marginTop = 12;
                 materialName.style.marginBottom = 4;
 
-                if (headerText != "Unsupported/Locked Shaders")
+                float minBrightness = 0f;
+                float maxBrightness = 0f;
+
+                try
                 {
-                    float minBrightness = 0f;
-                    float maxBrightness = 0f;
-
-                    try
-                    {
-                        minBrightness = material.GetFloat(minBrightnessPropertyName);
-                        maxBrightness = material.GetFloat(maxBrightnessPropertyName);
-                    }
-                    catch (UnityException)
-                    {
-                        Label errorLabel = new Label("Error!")
-                            .WithClass("slider-value")
-                            .ChildOf(shaderElement);
-                        continue;
-                    }
-
-                    VisualElement minBrightnessSliderContainer = new VisualElement()
-                        .WithClass("slider-container")
-                        .ChildOf(shaderElement);
-                    minBrightnessSliderContainer.style.display = DisplayStyle.Flex;
-                    minBrightnessSliderContainer.style.flexDirection = FlexDirection.Row;
-                    minBrightnessSliderContainer.style.justifyContent = Justify.SpaceBetween;
-
-                    VisualElement maxBrightnessSliderContainer = new VisualElement()
-                        .WithClass("slider-container")
-                        .ChildOf(shaderElement);
-                    maxBrightnessSliderContainer.style.display = DisplayStyle.Flex;
-                    maxBrightnessSliderContainer.style.flexDirection = FlexDirection.Row;
-                    maxBrightnessSliderContainer.style.justifyContent = Justify.SpaceBetween;
-
-                    Slider minBrightnessSlider = new Slider($"Min Brightness", 0f, 1f, 0, 1f)
-                        .WithClass("shader-brightness-slider")
-                        .ChildOf(minBrightnessSliderContainer);
-                    minBrightnessSlider.style.fontSize = 12;
-                    minBrightnessSlider.style.flexGrow = 1;
-                    minBrightnessSlider.value = minBrightness;
-
-                    Label minBrightnessValue = new Label(minBrightness.ToString("0.00"))
-                        .WithClass("slider-value")
-                        .ChildOf(minBrightnessSliderContainer);
-                    minBrightnessValue.style.marginLeft = 4;
-                    minBrightnessValue.style.marginRight = 16;
-
-                    Slider maxBrightnessSlider = new Slider($"Max Brightness", 0f, 1f, 0, 1f)
-                        .WithClass("shader-brightness-slider")
-                        .ChildOf(maxBrightnessSliderContainer);
-                    maxBrightnessSlider.style.fontSize = 12;
-                    maxBrightnessSlider.style.flexGrow = 1;
-                    maxBrightnessSlider.value = maxBrightness;
-
-                    Label maxBrightnessValue = new Label(maxBrightness.ToString("0.00"))
-                        .WithClass("slider-value")
-                        .ChildOf(maxBrightnessSliderContainer);
-                    maxBrightnessValue.style.marginLeft = 4;
-                    maxBrightnessValue.style.marginRight = 16;
-
-                    minBrightnessSlider.RegisterValueChangedCallback(evt =>
-                    {
-                        float newMinBrightness = evt.newValue;
-                        minBrightnessValue.text = evt.newValue.ToString("0.00");
-                        material.SetFloat(
-                            minBrightnessPropertyName,
-                            (float)Math.Round(evt.newValue * 100f) / 100f
-                        );
-                    });
-
-                    maxBrightnessSlider.RegisterValueChangedCallback(evt =>
-                    {
-                        float newMaxBrightness = evt.newValue;
-                        maxBrightnessValue.text = evt.newValue.ToString("0.00");
-                        material.SetFloat(
-                            maxBrightnessPropertyName,
-                            (float)Math.Round(evt.newValue * 100f) / 100f
-                        );
-                    });
+                    minBrightness = material.GetFloat(minBrightnessPropertyName);
+                    maxBrightness = material.GetFloat(maxBrightnessPropertyName);
                 }
+                catch (UnityException)
+                {
+                    Label errorLabel = new Label("Error!")
+                        .WithClass("slider-value")
+                        .ChildOf(shaderElement);
+                    continue;
+                }
+
+                VisualElement minBrightnessSliderContainer = new VisualElement()
+                    .WithClass("shaderslider-container")
+                    .ChildOf(shaderElement);
+
+                Slider minBrightnessSlider = new Slider($"Min Brightness", 0f, 1f, 0, 1f)
+                    .WithClass("shaderslider-brightness")
+                    .ChildOf(minBrightnessSliderContainer);
+                minBrightnessSlider.value = minBrightness;
+
+                Label minBrightnessValue = new Label(minBrightness.ToString("0.00"))
+                    .WithClass("shaderslider-value")
+                    .ChildOf(minBrightnessSliderContainer);
+
+                minBrightnessSlider.RegisterValueChangedCallback(evt =>
+                {
+                    float newMinBrightness = evt.newValue;
+                    minBrightnessValue.text = evt.newValue.ToString("0.00");
+                    material.SetFloat(
+                        minBrightnessPropertyName,
+                        (float)Math.Round(evt.newValue * 100f) / 100f
+                    );
+                });
+
+                VisualElement maxBrightnessSliderContainer = new VisualElement()
+                    .WithClass("shaderslider-container")
+                    .ChildOf(shaderElement);
+
+                Slider maxBrightnessSlider = new Slider($"Max Brightness", 0f, 1f, 0, 1f)
+                    .WithClass("shaderslider-brightness")
+                    .ChildOf(maxBrightnessSliderContainer);
+                maxBrightnessSlider.value = maxBrightness;
+
+                Label maxBrightnessValue = new Label(maxBrightness.ToString("0.00"))
+                    .WithClass("shaderslider-value")
+                    .ChildOf(maxBrightnessSliderContainer);
+
+                maxBrightnessSlider.RegisterValueChangedCallback(evt =>
+                {
+                    float newMaxBrightness = evt.newValue;
+                    maxBrightnessValue.text = evt.newValue.ToString("0.00");
+                    material.SetFloat(
+                        maxBrightnessPropertyName,
+                        (float)Math.Round(evt.newValue * 100f) / 100f
+                    );
+                });
             }
         }
 
         private void renderAboutSection(VisualElement parentElement)
         {
-            // Create a list with the currently supported shaders
-            Label supportedShadersHeaderLabel = new Label("Supported Shaders").WithClass(
-                "supported-shaders-header-label"
-            );
-            supportedShadersHeaderLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            supportedShadersHeaderLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            supportedShadersHeaderLabel.style.fontSize = 14;
+            Label supportedShadersHeaderLabel = new Label("Supported Shaders").WithClass("header");
             parentElement.Add(supportedShadersHeaderLabel);
 
             Label supportedShadersLabel = new Label("- lilToon\n- Poiyomi Toon 8.1").WithClass(
                 "supported-shaders-label"
             );
-
-            supportedShadersLabel.style.fontSize = 12;
             parentElement.Add(supportedShadersLabel);
 
-            Label versionLabel = new Label($"v{CURRENT_VERSION} | Made by dyl#1234").WithClass(
-                "version-label"
-            );
+            Label versionLabel = new Label($"version Dev").WithClass("header");
             versionLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            versionLabel.style.fontSize = 12;
             versionLabel.style.marginTop = 12;
             versionLabel.style.marginBottom = 8;
             parentElement.Add(versionLabel);

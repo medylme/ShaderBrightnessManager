@@ -1,44 +1,13 @@
 .top-area
 {
       flex-direction: row;
-}
-
-.select-avatar-label 
-{
-    font-weight: bold;
-    text-align: center;
-}
-
-.shader-header
-{
-    font-weight: bold;
-    text-align: center;
-}
-
-.selected-tab
-{
-    flex-grow: 1;
-    flex-basis: 1px;
-    border-left-width: 1;
-    border-top-width: 1;
-}
-
-.margin-normal
-{
-    margin: 5px;
-}
-
-.header-small
-{
-    -unity-font-style: bold;
-    font-size: 11px;
-    margin: 7px 0;
-}
-
-.header
-{
-    -unity-font-style: bold;
-    margin: 7px 0;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0,0,0,0.25);
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-left: 10px;
+      padding-right: 10px;
 }
 
 .avatar-field
@@ -49,28 +18,101 @@
     flex-shrink: 1;
 }
 
-.top-spaced
+.refresh-button
 {
-    margin-top: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    max-height: 30px;
 }
 
-.bordered-container
+.section
 {
-    border-width: 2px;
-    border-color: rgba(128,128,128,0.2);
-    background-color: rgba(128,128,128,0.1);
-    margin-bottom: 4px;
-    padding: 2px;
+    font-size: 13px;
+    background-color: rgba(0,0,0,0.25);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 10px;
+    margin-left: 5px;
+    margin-right: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
-.warning-label
+.subsection
 {
+    font-size: 13px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 10px;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.main-container
+{
+    margin: 10px;
+}
+
+.select-avatar-label 
+{
+    font-weight: bold;
+    text-align: center;
+}
+
+.unsupported-material-label
+{
+    margin-top: 5px;
+    font-size: 11px;
     white-space: normal;
 }
 
-.grow-control
+.shader-header
 {
+    font-weight: bold;
+    text-align: center;
+}
+
+.header
+{
+    -unity-font-style: bold;
+    margin: 7px 0;
+}
+
+.shaderslider-container
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.shaderslider-brightness
+{
+    font-size: 12px;
     flex-grow: 1;
+}
+
+.shaderslider-value
+{
+    margin-left: 4px;
+    margin-right: 16px;
+}
+
+.notice-label
+{
+    font-size: 14px;
+    -unity-font-style: bold;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.version-label
+{
+    -unity-font-style: bold;
+    font-size: 13px;
 }
 
 .hidden
@@ -83,53 +125,7 @@
     justify-content: center;
 }
 
-AnimatorLayerTabElement
-{
-    margin-bottom: 10px;
-}
-
-.layer-tab-header
-{
-    margin: 5px;
-    height: 23px;
-    align-content: center;
-    border-width: 1px;
-    border-color: rgba(128,128,128,0.4);
-    background-color: rgba(128,128,128,0.3);
-    border-radius: 6px;
-}
-.layer-tab-arrow
-{
-    width: 13px;
-    height: 13px;
-    align-self: center;
-}
-
-.layer-tab-title
-{
-    margin-left: 4px;
-    -unity-font-style: bold;
-    align-self: center;
-}
-
-.layer-tab-content
-{
-    margin: 0 10px 10px 10px;
-}
-
-.delete-button
-{
-    background-image: resource("d_winbtn_win_close@2x");
-    background-color: transparent;
-    border-width: 0;
-    width: 18px;
-    height: 18px;
-    max-width: 18px;
-    max-height: 18px;
-}
-
 TextField>Label
 {
     max-width: 150px;
 }
-
