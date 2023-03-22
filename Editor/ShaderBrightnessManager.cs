@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -121,10 +121,12 @@ namespace medyl.ShaderBrightnessManager
             VisualElement parentElement
         )
         {
-            // Get all materials on the avatar and sort them into lists
-            List<Material> poiyomi81Shaders = new List<Material>();
-            List<Material> lilToonShaders = new List<Material>();
             List<Material> unsupportedShaders = new List<Material>();
+            List<Material> lilToonShaders = new List<Material>();
+            List<Material> poiyomi81Shaders = new List<Material>();
+            List<Material> poiyomi80Shaders = new List<Material>();
+            List<Material> poiyomi73Shaders = new List<Material>();
+
             foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
             {
                 Material[] materials = skinnedMeshRenderer.sharedMaterials;
@@ -150,10 +152,36 @@ namespace medyl.ShaderBrightnessManager
                         string shaderName = shader ? shader.name : "None";
 
                         if (shaderName.Contains("Poiyomi 8.1") && !shaderName.Contains("Locked"))
+                        // Poiyomi 8.1
+                        else if (
+                            (shaderName.StartsWith(".poiyomi/Poiyomi 8.1/"))
+                            && (
+                                material.HasProperty("_LightingMinLightBrightness")
+                                && material.HasProperty("_LightingCap")
+                            )
+                        )
                         {
                             poiyomi81Shaders.Add(material);
                         }
-                        else if (shaderName.Contains("lilToon"))
+                        // Poiyomi 8.0
+                        else if (
+                            (shaderName.StartsWith(".poiyomi/Poiyomi 8.0/"))
+                            && (
+                                material.HasProperty("_LightingMinLightBrightness")
+                                && material.HasProperty("_LightingCap")
+                            )
+                        )
+                        {
+                            poiyomi80Shaders.Add(material);
+                        }
+                        // Poiyomi 7.3
+                        else if (
+                            (shaderName.StartsWith(".poiyomi/Poiyomi 7.3/"))
+                            && (material.HasProperty("_LightingMinLightBrightness"))
+                        )
+                        {
+                            poiyomi73Shaders.Add(material);
+                        }
                         {
                             lilToonShaders.Add(material);
                         }
@@ -170,16 +198,43 @@ namespace medyl.ShaderBrightnessManager
                 }
             }
 
-            // Poiyomi 8.1 Toon
+            // Poiyomi 8.1
             if (poiyomi81Shaders.Count > 0)
             {
                 poiyomi81Shaders = poiyomi81Shaders.Distinct().ToList();
                 AddShaderToUI(
-                    "Poiyomi 8.1 Toon",
+                    "Poiyomi 8.1",
                     parentElement,
                     poiyomi81Shaders,
                     "_LightingMinLightBrightness",
                     "_LightingCap"
+                );
+            }
+
+            // Poiyomi 8.0
+            if (poiyomi80Shaders.Count > 0)
+            {
+                poiyomi80Shaders = poiyomi80Shaders.Distinct().ToList();
+                AddShaderToUI(
+                    "Poiyomi 8.0",
+                    parentElement,
+                    poiyomi80Shaders,
+                    "_LightingMinLightBrightness",
+                    "_LightingCap"
+                );
+            }
+
+            // Poiyomi 7.3
+            if (poiyomi73Shaders.Count > 0)
+            {
+                poiyomi73Shaders = poiyomi73Shaders.Distinct().ToList();
+                AddShaderToUI(
+                    "Poiyomi 7.3",
+                    parentElement,
+                    poiyomi73Shaders,
+                    "_LightingMinLightBrightness",
+                    // No idea where Max Brightness is ???
+                    null
                 );
             }
 
@@ -316,7 +371,7 @@ namespace medyl.ShaderBrightnessManager
             Label supportedShadersHeaderLabel = new Label("Supported Shaders").WithClass("header");
             parentElement.Add(supportedShadersHeaderLabel);
 
-            Label supportedShadersLabel = new Label("- lilToon\n- Poiyomi Toon 8.1").WithClass(
+            Label supportedShadersLabel = new Label("- lilToon\n- Poiyomi 7.3/8.0/8.1").WithClass(
                 "supported-shaders-label"
             );
             parentElement.Add(supportedShadersLabel);
