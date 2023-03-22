@@ -7,7 +7,7 @@
 ## Information
 I got tired of having to hunt down every material one-by-one when changing min/max brightness values on shaders like [lilToon](https://github.com/lilxyzw/lilToon), so I created a tool to easily manage these values for each material used on the avatar. Will add support for more shaders over time. 
 ### Currently Supported Shaders
-- [Poiyomi Toon 8.1](https://github.com/poiyomi/PoiyomiToonShader)
+- [Poiyomi 7.3/8.0/8.1](https://github.com/poiyomi/PoiyomiToonShader)
 - [lilToon](https://github.com/lilxyzw/lilToon)
 
 ## How to use
