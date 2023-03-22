@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -136,12 +136,7 @@ namespace medyl.ShaderBrightnessManager
                 }
                 foreach (Material material in materials)
                 {
-                    if 
-                    (
-                        material == null ||
-                        material.shader == null ||
-                        material.name == null
-                    )
+                    if (material == null || material.shader == null || material.name == null)
                     {
                         continue;
                     }
@@ -151,7 +146,10 @@ namespace medyl.ShaderBrightnessManager
                         Shader shader = material.shader;
                         string shaderName = shader ? shader.name : "None";
 
-                        if (shaderName.Contains("Poiyomi 8.1") && !shaderName.Contains("Locked"))
+                        if (shaderName.Contains("Locked"))
+                        {
+                            unsupportedShaders.Add(material);
+                        }
                         // Poiyomi 8.1
                         else if (
                             (shaderName.StartsWith(".poiyomi/Poiyomi 8.1/"))
@@ -182,6 +180,15 @@ namespace medyl.ShaderBrightnessManager
                         {
                             poiyomi73Shaders.Add(material);
                         }
+                        // lilToon
+                        else if (
+                            (shaderName.Contains("lilToon") || shaderName.StartsWith("_lil/"))
+                            && (
+                                shaderName != "_lil/[Optional] lilToonFakeShadow"
+                                && material.HasProperty("_LightMinLimit")
+                                && material.HasProperty("_LightMaxLimit")
+                            )
+                        )
                         {
                             lilToonShaders.Add(material);
                         }
@@ -318,51 +325,57 @@ namespace medyl.ShaderBrightnessManager
                     continue;
                 }
 
-                VisualElement minBrightnessSliderContainer = new VisualElement()
-                    .WithClass("shaderslider-container")
-                    .ChildOf(shaderElement);
-
-                Slider minBrightnessSlider = new Slider($"Min Brightness", 0f, 1f, 0, 1f)
-                    .WithClass("shaderslider-brightness")
-                    .ChildOf(minBrightnessSliderContainer);
-                minBrightnessSlider.value = minBrightness;
-
-                Label minBrightnessValue = new Label(minBrightness.ToString("0.00"))
-                    .WithClass("shaderslider-value")
-                    .ChildOf(minBrightnessSliderContainer);
-
-                minBrightnessSlider.RegisterValueChangedCallback(evt =>
+                if (minBrightnessPropertyName != null)
                 {
-                    float newMinBrightness = evt.newValue;
-                    minBrightnessValue.text = evt.newValue.ToString("0.00");
-                    material.SetFloat(
-                        minBrightnessPropertyName,
-                        (float)Math.Round(evt.newValue * 100f) / 100f
-                    );
-                });
+                    VisualElement minBrightnessSliderContainer = new VisualElement()
+                        .WithClass("shaderslider-container")
+                        .ChildOf(shaderElement);
 
-                VisualElement maxBrightnessSliderContainer = new VisualElement()
-                    .WithClass("shaderslider-container")
-                    .ChildOf(shaderElement);
+                    Slider minBrightnessSlider = new Slider($"Min Brightness", 0f, 1f, 0, 1f)
+                        .WithClass("shaderslider-brightness")
+                        .ChildOf(minBrightnessSliderContainer);
+                    minBrightnessSlider.value = minBrightness;
 
-                Slider maxBrightnessSlider = new Slider($"Max Brightness", 0f, 1f, 0, 1f)
-                    .WithClass("shaderslider-brightness")
-                    .ChildOf(maxBrightnessSliderContainer);
-                maxBrightnessSlider.value = maxBrightness;
+                    Label minBrightnessValue = new Label(minBrightness.ToString("0.00"))
+                        .WithClass("shaderslider-value")
+                        .ChildOf(minBrightnessSliderContainer);
 
-                Label maxBrightnessValue = new Label(maxBrightness.ToString("0.00"))
-                    .WithClass("shaderslider-value")
-                    .ChildOf(maxBrightnessSliderContainer);
+                    minBrightnessSlider.RegisterValueChangedCallback(evt =>
+                    {
+                        float newMinBrightness = evt.newValue;
+                        minBrightnessValue.text = evt.newValue.ToString("0.00");
+                        material.SetFloat(
+                            minBrightnessPropertyName,
+                            (float)Math.Round(evt.newValue * 100f) / 100f
+                        );
+                    });
+                }
 
-                maxBrightnessSlider.RegisterValueChangedCallback(evt =>
+                if (maxBrightnessPropertyName != null)
                 {
-                    float newMaxBrightness = evt.newValue;
-                    maxBrightnessValue.text = evt.newValue.ToString("0.00");
-                    material.SetFloat(
-                        maxBrightnessPropertyName,
-                        (float)Math.Round(evt.newValue * 100f) / 100f
-                    );
-                });
+                    VisualElement maxBrightnessSliderContainer = new VisualElement()
+                        .WithClass("shaderslider-container")
+                        .ChildOf(shaderElement);
+
+                    Slider maxBrightnessSlider = new Slider($"Max Brightness", 0f, 1f, 0, 1f)
+                        .WithClass("shaderslider-brightness")
+                        .ChildOf(maxBrightnessSliderContainer);
+                    maxBrightnessSlider.value = maxBrightness;
+
+                    Label maxBrightnessValue = new Label(maxBrightness.ToString("0.00"))
+                        .WithClass("shaderslider-value")
+                        .ChildOf(maxBrightnessSliderContainer);
+
+                    maxBrightnessSlider.RegisterValueChangedCallback(evt =>
+                    {
+                        float newMaxBrightness = evt.newValue;
+                        maxBrightnessValue.text = evt.newValue.ToString("0.00");
+                        material.SetFloat(
+                            maxBrightnessPropertyName,
+                            (float)Math.Round(evt.newValue * 100f) / 100f
+                        );
+                    });
+                }
             }
         }
 
