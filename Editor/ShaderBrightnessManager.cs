@@ -134,20 +134,38 @@ namespace medyl.ShaderBrightnessManager
                 }
                 foreach (Material material in materials)
                 {
-                    Shader shader = material.shader;
-                    string shaderName = shader ? shader.name : "None";
+                    if 
+                    (
+                        material == null ||
+                        material.shader == null ||
+                        material.name == null
+                    )
+                    {
+                        continue;
+                    }
 
-                    if (shaderName.Contains("Poiyomi 8.1") && !shaderName.Contains("Locked"))
+                    try
                     {
-                        poiyomi81Shaders.Add(material);
+                        Shader shader = material.shader;
+                        string shaderName = shader ? shader.name : "None";
+
+                        if (shaderName.Contains("Poiyomi 8.1") && !shaderName.Contains("Locked"))
+                        {
+                            poiyomi81Shaders.Add(material);
+                        }
+                        else if (shaderName.Contains("lilToon"))
+                        {
+                            lilToonShaders.Add(material);
+                        }
+                        else
+                        {
+                            unsupportedShaders.Add(material);
+                        }
                     }
-                    else if (shaderName.Contains("lilToon"))
+                    catch
                     {
-                        lilToonShaders.Add(material);
-                    }
-                    else
-                    {
-                        unsupportedShaders.Add(material);
+                        Debug.LogError("Failed to load material: " + material.name);
+                        continue;
                     }
                 }
             }
