@@ -76,6 +76,17 @@
     text-align: center;
 }
 
+.footer-container
+{
+    padding-top: 10px;
+}
+
+.github-button
+{
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
 .header
 {
     -unity-font-style: bold;

@@ -267,7 +267,6 @@ namespace medyl.ShaderBrightnessManager
                 unsupportedShadersSection.value = false;
                 unsupportedShadersSection.text = "Unsupported/Locked Materials";
 
-                // Remove duplicates
                 unsupportedShaders = unsupportedShaders.Distinct().ToList();
 
                 foreach (Material material in unsupportedShaders)
@@ -389,11 +388,27 @@ namespace medyl.ShaderBrightnessManager
             );
             parentElement.Add(supportedShadersLabel);
 
-            Label versionLabel = new Label("version Dev").WithClass("header");
-            versionLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            versionLabel.style.marginTop = 12;
-            versionLabel.style.marginBottom = 8;
-            parentElement.Add(versionLabel);
+            VisualElement footerContainer = new VisualElement()
+                .ChildOf(parentElement)
+                .WithClass("footer-container");
+            footerContainer.style.display = DisplayStyle.Flex;
+            footerContainer.style.flexDirection = FlexDirection.Row;
+            footerContainer.style.justifyContent = Justify.Center;
+            footerContainer.style.alignItems = Align.Center;
+
+            Button githubButton = new Button(
+                () => Application.OpenURL("https://github.com/medylme/ShaderBrightnessManager/")
+            );
+            githubButton.AddToClassList("github-button");
+            githubButton.text = "GitHub Page";
+            footerContainer.Add(githubButton);
+
+            Label spacer = new Label(" • ").WithClass("spacer");
+            footerContainer.Add(spacer);
+            Label versionLabel = new Label("version Dev")
+                .WithClass("header")
+                .ChildOf(footerContainer);
+            footerContainer.Add(versionLabel);
         }
     }
 }
